@@ -293,6 +293,7 @@
   .lead-form .agree input[type=checkbox]{
     flex:0 0 18px;width:18px;height:18px;margin-top:2px;
     accent-color:var(--gold);cursor:pointer;
+    -webkit-appearance:checkbox;appearance:checkbox;
   }
   .lead-form .agree span{font-size:.8rem;color:#b6a88f;line-height:1.5}
   .lead-form .agree a{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
@@ -894,14 +895,32 @@
       if (!agree) { document.getElementById('f-agree').focus();
         alert('Необходимо согласие с политикой конфиденциальности'); return; }
 
-      /* отправка: здесь можно подключить реальный бэкенд/webhook */
       formBtn.disabled = true;
       formBtn.textContent = 'Отправляем…';
 
-      setTimeout(function(){
-        leadForm.style.display = 'none';
-        formSuccess.style.display = 'block';
-      }, 600);
+      var goal = document.getElementById('f-goal').value;
+      var fd = new FormData();
+      fd.append('name', name);
+      fd.append('phone', phone);
+      fd.append('goal', goal);
+
+      fetch('send.php', { method: 'POST', body: fd })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          if (data.ok) {
+            leadForm.style.display = 'none';
+            formSuccess.style.display = 'block';
+          } else {
+            formBtn.disabled = false;
+            formBtn.textContent = 'Отправить заявку';
+            alert('Ошибка отправки. Позвоните нам: +7 (969) 049-09-01');
+          }
+        })
+        .catch(function(){
+          formBtn.disabled = false;
+          formBtn.textContent = 'Отправить заявку';
+          alert('Ошибка соединения. Позвоните нам: +7 (969) 049-09-01');
+        });
     });
   }
 

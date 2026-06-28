@@ -382,6 +382,7 @@
   .lead-form .agree input[type=checkbox]{
     flex:0 0 18px;width:18px;height:18px;margin-top:2px;
     accent-color:var(--gold);cursor:pointer;
+    -webkit-appearance:checkbox;appearance:checkbox;
   }
   .lead-form .agree span{font-size:.8rem;color:#b6a88f;line-height:1.5}
   .lead-form .agree a{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
@@ -749,6 +750,12 @@
           <div>Ялта, ул. Таврическая, 14</div>
           <div>600 м до набережной</div>
         </div>
+        <p style="margin-top:28px;font-size:.72rem;color:#9a8b79;line-height:1.6;max-width:480px;margin-left:auto;margin-right:auto">
+          Информация на сайте носит справочный характер и не является публичной офертой в части приобретения объектов недвижимости
+          (ст. 437 ГК РФ). Застройщик: ООО «К-риэлти плюс», ИНН 9102297685, ОГРН 1249100009069.
+          Проектная декларация опубликована на сайте <a href="https://наш.дом.рф" target="_blank" rel="noopener" style="color:#c2a14e">наш.дом.рф</a>
+          в соответствии с ч. 2 ст. 19 Федерального закона № 214-ФЗ.
+        </p>
       </section>
 
     </div><!-- /sheet -->
@@ -1020,14 +1027,32 @@
       if (!agree) { document.getElementById('f-agree').focus();
         alert('Необходимо согласие с политикой конфиденциальности'); return; }
 
-      /* отправка: здесь можно подключить реальный бэкенд/webhook */
       formBtn.disabled = true;
       formBtn.textContent = 'Отправляем…';
 
-      setTimeout(function(){
-        leadForm.style.display = 'none';
-        formSuccess.style.display = 'block';
-      }, 600);
+      var goal = document.getElementById('f-goal').value;
+      var fd = new FormData();
+      fd.append('name', name);
+      fd.append('phone', phone);
+      fd.append('goal', goal);
+
+      fetch('send.php', { method: 'POST', body: fd })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          if (data.ok) {
+            leadForm.style.display = 'none';
+            formSuccess.style.display = 'block';
+          } else {
+            formBtn.disabled = false;
+            formBtn.textContent = 'Отправить заявку';
+            alert('Ошибка отправки. Позвоните нам: +7 (969) 049-09-01');
+          }
+        })
+        .catch(function(){
+          formBtn.disabled = false;
+          formBtn.textContent = 'Отправить заявку';
+          alert('Ошибка соединения. Позвоните нам: +7 (969) 049-09-01');
+        });
     });
   }
 
@@ -1111,6 +1136,50 @@ document.querySelectorAll('.eml-protect').forEach(function(el){
   a.style.cssText=el.style.cssText;
   el.parentNode.replaceChild(a,el);
 });
+</script>
+
+<!-- Cookie-баннер (152-ФЗ) -->
+<div id="cookie-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:rgba(27,20,16,.97);color:#d4c8b8;padding:18px clamp(16px,4vw,48px);
+  font-family:'Manrope',sans-serif;font-size:.82rem;line-height:1.6;
+  border-top:1px solid rgba(194,161,78,.3);backdrop-filter:blur(8px)">
+  <div style="max-width:960px;margin:0 auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <span style="flex:1;min-width:260px">
+      Сайт использует файлы cookie для корректной работы и анализа посещаемости.
+      Продолжая использовать сайт, вы соглашаетесь с
+      <a href="politika.html" style="color:#c2a14e;text-decoration:underline">Политикой конфиденциальности</a>
+      и обработкой персональных данных в соответствии с 152-ФЗ.
+    </span>
+    <div style="display:flex;gap:10px;flex-shrink:0">
+      <button onclick="cookieAccept()" style="
+        background:#c2a14e;color:#1b1410;border:none;border-radius:6px;
+        padding:10px 24px;font-family:'Manrope',sans-serif;font-size:.82rem;
+        font-weight:600;cursor:pointer;white-space:nowrap">
+        Принять
+      </button>
+      <button onclick="cookieDecline()" style="
+        background:transparent;color:#9a8b79;border:1px solid rgba(194,161,78,.3);border-radius:6px;
+        padding:10px 18px;font-family:'Manrope',sans-serif;font-size:.82rem;
+        cursor:pointer;white-space:nowrap">
+        Только необходимые
+      </button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  if (!localStorage.getItem('cookie_ok')) {
+    document.getElementById('cookie-bar').style.display = 'block';
+  }
+})();
+function cookieAccept() {
+  localStorage.setItem('cookie_ok', 'all');
+  document.getElementById('cookie-bar').style.display = 'none';
+}
+function cookieDecline() {
+  localStorage.setItem('cookie_ok', 'necessary');
+  document.getElementById('cookie-bar').style.display = 'none';
+}
 </script>
 </body>
 </html>
