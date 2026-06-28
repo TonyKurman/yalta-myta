@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /send.php
 
-Sitemap: https://yalta-myta.ru/sitemap.xml
+Sitemap: https://www.yalta-myta.ru/sitemap.xml
